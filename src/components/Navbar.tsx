@@ -37,7 +37,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenChainModal, onNavigate, cu
         headers: { 'x-trustvault-user-id': user?.id || '' },
       });
       if (res.ok) {
-        const data = await res.json();
+        const text = await res.text();
+        const data = text ? JSON.parse(text) : {};
         setNotifications(data.notifications || []);
       }
     } catch (e) {

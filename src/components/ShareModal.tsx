@@ -55,7 +55,14 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         }),
       });
 
-      const data = await res.json();
+      const text = await res.text();
+      let data: any = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = { message: text };
+      }
+
       if (!res.ok) {
         setError(data.message || 'Failed to share document');
         return;

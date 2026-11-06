@@ -46,7 +46,8 @@ export const MyDocumentsPage: React.FC<MyDocumentsPageProps> = ({
         headers: { 'x-trustvault-user-id': user?.id || '' },
       });
       if (res.ok) {
-        const data = await res.json();
+        const text = await res.text();
+        const data = text ? JSON.parse(text) : {};
         setDocuments(data.documents || []);
       }
     } catch (e) {
@@ -76,7 +77,9 @@ export const MyDocumentsPage: React.FC<MyDocumentsPageProps> = ({
       });
 
       if (!res.ok) {
-        const err = await res.json();
+        const text = await res.text();
+        let err: any = {};
+        try { err = text ? JSON.parse(text) : {}; } catch { err = { message: text }; }
         setActionFeedback({ type: 'error', message: err.message || 'Download denied by security policy' });
         return;
       }
@@ -108,7 +111,10 @@ export const MyDocumentsPage: React.FC<MyDocumentsPageProps> = ({
         headers: { 'x-trustvault-user-id': user?.id || '' },
       });
 
-      const data = await res.json();
+      const text = await res.text();
+      let data: any = {};
+      try { data = text ? JSON.parse(text) : {}; } catch { data = { message: text }; }
+
       if (!res.ok) {
         setActionFeedback({ type: 'error', message: data.message || 'Re-scan failed' });
       } else {

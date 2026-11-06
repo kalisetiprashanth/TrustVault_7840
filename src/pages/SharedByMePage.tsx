@@ -26,7 +26,8 @@ export const SharedByMePage: React.FC<SharedByMePageProps> = ({ onNavigate, onOp
         headers: { 'x-trustvault-user-id': user?.id || '' },
       });
       if (res.ok) {
-        const data = await res.json();
+        const text = await res.text();
+        const data = text ? JSON.parse(text) : {};
         const myDocs: DocumentRecord[] = (data.documents || []).filter(
           (d: DocumentRecord) => d.ownerId === user?.id
         );
@@ -38,7 +39,8 @@ export const SharedByMePage: React.FC<SharedByMePageProps> = ({ onNavigate, onOp
             headers: { 'x-trustvault-user-id': user?.id || '' },
           });
           if (detailRes.ok) {
-            const detailData = await detailRes.json();
+            const detailText = await detailRes.text();
+            const detailData = detailText ? JSON.parse(detailText) : {};
             const perms: PermissionRecord[] = detailData.permissions || [];
             for (const p of perms) {
               allOutbound.push({ permission: p, document: doc });

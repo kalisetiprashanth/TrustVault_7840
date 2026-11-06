@@ -18,6 +18,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [token, setToken] = useState<string | null>(localStorage.getItem('trustvault_token'));
   const [loading, setLoading] = useState<boolean>(true);
 
+  const parseResponse = async (res: Response) => {
+    const text = await res.text();
+    try {
+      return text ? JSON.parse(text) : {};
+    } catch {
+      return { message: text || `Server returned status ${res.status}` };
+    }
+  };
+
   const fetchCurrentUser = async (authToken: string) => {
     try {
       const res = await fetch('/api/auth/me', {
@@ -27,8 +36,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         },
       });
       if (res.ok) {
-        const data = await res.json();
-        setUser(data.user);
+        const data = await parseResponse(res);
+        if (data && data.user) {
+          setUser(data.user);
+        } else {
+          setUser(null);
+          localStorage.removeItem('trustvault_token');
+          setToken(null);
+        }
       } else {
         setUser(null);
         localStorage.removeItem('trustvault_token');
@@ -45,8 +60,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (token) {
       fetchCurrentUser(token);
     } else {
-      // Default to Owner demo user on initial load for a seamless experience
-      switchDemoUser('OWNER');
+      setLoading(false);
     }
   }, []);
 
@@ -57,16 +71,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-      const data = await res.json();
+      const data = await parseResponse(res);
       if (!res.ok) {
-        return { success: false, error: data.message || 'Login failed' };
+        return { success: false, error: data.message || `Login failed (Status: ${res.status})` };
+      }
+      if (!data.user || !data.token) {
+        return { success: false, error: 'Invalid response from authentication server' };
       }
       setUser(data.user);
       setToken(data.token);
       localStorage.setItem('trustvault_token', data.token);
       return { success: true };
     } catch (err: any) {
-      return { success: false, error: err.message || 'Network error' };
+      return { success: false, error: err.message || 'Network error during login' };
     }
   };
 

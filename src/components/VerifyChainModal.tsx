@@ -14,7 +14,8 @@ export const VerifyChainModal: React.FC<VerifyChainModalProps> = ({ isOpen, onCl
     setLoading(true);
     try {
       const res = await fetch('/api/audit/verify-chain');
-      const data = await res.json();
+      const text = await res.text();
+      const data = text ? JSON.parse(text) : {};
       setResult(data);
     } catch (err: any) {
       setResult({ isValid: false, error: err.message });

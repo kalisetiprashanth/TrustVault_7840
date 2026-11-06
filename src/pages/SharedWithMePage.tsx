@@ -20,7 +20,8 @@ export const SharedWithMePage: React.FC<SharedWithMePageProps> = ({ onNavigate }
         headers: { 'x-trustvault-user-id': user?.id || '' },
       });
       if (res.ok) {
-        const data = await res.json();
+        const text = await res.text();
+        const data = text ? JSON.parse(text) : {};
         // Filter only documents where the user is NOT the owner
         const filtered = (data.documents || []).filter(
           (d: DocumentRecord) => d.ownerId !== user?.id
@@ -44,7 +45,9 @@ export const SharedWithMePage: React.FC<SharedWithMePageProps> = ({ onNavigate }
         headers: { 'x-trustvault-user-id': user?.id || '' },
       });
       if (!res.ok) {
-        const err = await res.json();
+        const text = await res.text();
+        let err: any = {};
+        try { err = text ? JSON.parse(text) : {}; } catch { err = { message: text }; }
         setFeedback(err.message || 'Download forbidden by permission policy');
         return;
       }

@@ -70,7 +70,14 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onNavigate }) => {
         }),
       });
 
-      const data = await res.json();
+      const text = await res.text();
+      let data: any = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = { message: text };
+      }
+
       if (!res.ok) {
         setOtpError(data.message || 'Registration failed');
         setLoading(false);

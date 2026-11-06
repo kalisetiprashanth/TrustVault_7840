@@ -52,13 +52,19 @@ export const DocumentDetailsPage: React.FC<DocumentDetailsPageProps> = ({
         headers: { 'x-trustvault-user-id': user?.id || '' },
       });
 
+      const text = await res.text();
+      let data: any = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = { message: text };
+      }
+
       if (!res.ok) {
-        const err = await res.json();
-        setError(err.message || 'Access Denied: You do not have authorization to view this document.');
+        setError(data.message || 'Access Denied: You do not have authorization to view this document.');
         return;
       }
 
-      const data = await res.json();
       setDoc(data.document);
       setPermissions(data.permissions || []);
       setIsOwner(data.isOwner);

@@ -43,11 +43,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       ]);
 
       if (docsRes.ok) {
-        const d = await docsRes.json();
+        const text = await docsRes.text();
+        const d = text ? JSON.parse(text) : {};
         setDocuments(d.documents || []);
       }
       if (auditRes.ok) {
-        const a = await auditRes.json();
+        const text = await auditRes.text();
+        const a = text ? JSON.parse(text) : {};
         setAuditEvents(a.events || []);
       }
     } catch (e) {

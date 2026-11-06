@@ -33,7 +33,8 @@ export const AuditPage: React.FC<AuditPageProps> = ({ onOpenChainModal }) => {
         headers: { 'x-trustvault-user-id': user?.id || '' },
       });
       if (res.ok) {
-        const data = await res.json();
+        const text = await res.text();
+        const data = text ? JSON.parse(text) : {};
         setEvents(data.events || []);
       }
     } catch (e) {

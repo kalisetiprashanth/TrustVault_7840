@@ -18,18 +18,29 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 
+// CORS and Preflight OPTIONS handling
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, x-trustvault-user-id');
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  next();
+});
+
 // Body parsing
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Simple in-memory rate limiter for auth / OTP
+// Resilient in-memory rate limiter for auth / OTP
 interface RateLimitBucket {
   count: number;
   resetTime: number;
 }
 const rateLimits = new Map<string, RateLimitBucket>();
 
-function rateLimiter(limit = 30, windowMs = 60000) {
+function rateLimiter(limit = 120, windowMs = 60000) {
   return (req: Request, res: Response, next: NextFunction) => {
     const ip = req.ip || req.socket.remoteAddress || 'unknown';
     const key = `${ip}_${req.path}`;

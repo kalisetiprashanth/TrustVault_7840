@@ -26,7 +26,14 @@ export const ExternalInvitePage: React.FC<ExternalInvitePageProps> = ({ initialT
     setError(null);
     try {
       const res = await fetch(`/api/invitations/${token}`);
-      const data = await res.json();
+      const text = await res.text();
+      let data: any = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = { message: text };
+      }
+
       if (!res.ok) {
         setError(data.message || 'Invitation not found or expired');
         setInvite(null);
@@ -67,7 +74,14 @@ export const ExternalInvitePage: React.FC<ExternalInvitePageProps> = ({ initialT
         body: JSON.stringify({ emailOtp, smsOtp }),
       });
 
-      const data = await res.json();
+      const text = await res.text();
+      let data: any = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = { message: text };
+      }
+
       if (!res.ok) {
         setError(data.message || 'OTP verification failed');
       } else {

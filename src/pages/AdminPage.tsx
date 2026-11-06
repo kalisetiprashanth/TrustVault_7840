@@ -44,11 +44,13 @@ export const AdminPage: React.FC = () => {
       ]);
 
       if (uRes.ok) {
-        const u = await uRes.json();
+        const uText = await uRes.text();
+        const u = uText ? JSON.parse(uText) : {};
         setUsersList(u.users || []);
       }
       if (mRes.ok) {
-        const m = await mRes.json();
+        const mText = await mRes.text();
+        const m = mText ? JSON.parse(mText) : {};
         setMetrics(m.metrics);
       }
     } catch (e) {

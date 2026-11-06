@@ -22,7 +22,8 @@ export const SecurityTestPage: React.FC = () => {
     setLoading(true);
     try {
       const res = await fetch('/api/test/run-security-suite', { method: 'POST' });
-      const data = await res.json();
+      const text = await res.text();
+      const data = text ? JSON.parse(text) : {};
       setResults(data.results || []);
       setTotalExecuted(data.totalTests || 0);
     } catch (e) {
